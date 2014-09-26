@@ -22,6 +22,11 @@ public class NutsMessage implements Serializable {
         this.data = null;
     }
 
+    public NutsMessage(String request, InetAddress address, int port, Serializable data) {
+        this(request, address, port);
+        this.data = data;
+    }
+
     public static NutsMessage deserialize(byte[] data) throws IOException, ClassNotFoundException {
         return (NutsMessage) new ObjectInputStream(new ByteArrayInputStream(data)).readObject();
     }

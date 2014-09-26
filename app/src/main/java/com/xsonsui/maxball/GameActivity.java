@@ -2,6 +2,7 @@ package com.xsonsui.maxball;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.xsonsui.maxball.game.GameClient;
@@ -23,12 +24,14 @@ public class GameActivity extends Activity{
     private GameClient gameClient;
     private GameView gameView;
     private GameHost host;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_game);
+        mHandler = new Handler();
         gameView = (GameView) findViewById(R.id.gameView);
         //gameView = new GameView(this);
         //setContentView(gameView);
@@ -45,7 +48,7 @@ public class GameActivity extends Activity{
             Lobby lobby = (Lobby) extras.getSerializable("lobby");
             NutsNormalClient client = null;
             try {
-                client = new NutsNormalClient(InetAddress.getByName(lobby.ip), lobby.port, gameClient);
+                client = new NutsNormalClient(InetAddress.getByAddress(lobby.ip.getAddress()), lobby.port, gameClient);
                 gameClient.setClient(client);
                 gameView.setGameInputListener(gameClient);
             } catch (UnknownHostException e) {
@@ -64,15 +67,24 @@ public class GameActivity extends Activity{
         gameThread.start();
     }
 
-    public void connectToLocalHost(InetAddress publicAddress, int publicPort) {
-        try {
-            NutsNormalClient client = new NutsNormalClient(InetAddress.getLocalHost(), publicPort, gameClient);
-            gameClient.setClient(client);
-            gameView.setGameInputListener(gameClient);
-            client.start();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+    public void connectToLocalHost(final InetAddress publicAddress, final int publicPort) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+
+                NutsNormalClient client = null;
+                try {
+                    //client = new NutsNormalClient(InetAddress.getByName("127.0.0.1"), 29071, gameClient);
+                    client = new NutsNormalClient(InetAddress.getByAddress(publicAddress.getAddress()), publicPort, gameClient);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+                gameClient.setClient(client);
+                gameView.setGameInputListener(gameClient);
+                client.start();
+            }
+        });
+
     }
 
     @Override

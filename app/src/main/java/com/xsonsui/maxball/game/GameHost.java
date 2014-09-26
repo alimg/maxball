@@ -43,6 +43,7 @@ public class GameHost implements NutsClientListener, GameThread.GameUpdateListen
 
     @Override
     public void onConnected(InetAddress publicAddress, int publicPort) {
+        Log.d(TAG, "Connected to nuts: " + publicAddress.toString() + ":" + publicPort);
         gameActivity.connectToLocalHost(publicAddress, publicPort);
     }
 

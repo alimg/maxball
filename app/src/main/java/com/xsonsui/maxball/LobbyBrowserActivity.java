@@ -12,15 +12,16 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.xsonsui.maxball.model.Lobby;
+import com.xsonsui.maxball.nuts.NetAddress;
 
 import java.util.List;
 
 public class LobbyBrowserActivity extends Activity{
     LobbyManager lobbyManager = new LobbyManager();
     private String mSessionId;
-    public LobbyManager.Listener<List<Lobby>> listLobbiesListener = new LobbyManager.Listener<List<Lobby>>() {
+    public LobbyManager.Listener<List<NetAddress>> listLobbiesListener = new LobbyManager.Listener<List<NetAddress>>() {
         @Override
-        public void onSuccess(List<Lobby> result) {
+        public void onSuccess(List<NetAddress> result) {
             mAdapter.clear();
             mAdapter.addAll(result);
             mAdapter.notifyDataSetInvalidated();
@@ -47,7 +48,7 @@ public class LobbyBrowserActivity extends Activity{
         }
     };
     private ListView listView;
-    private ArrayAdapter<Lobby> mAdapter;
+    private ArrayAdapter<NetAddress> mAdapter;
     private ViewGroup layoutCreateLobby;
     private EditText editLobbyName;
     private LobbyManager.Listener<Lobby> createLobbyListener = new LobbyManager.Listener<Lobby>() {
@@ -82,7 +83,7 @@ public class LobbyBrowserActivity extends Activity{
         layoutCreateLobby.setVisibility(View.GONE);
         editLobbyName = (EditText)findViewById(R.id.editText);
         listView = (ListView)findViewById(R.id.listView);
-        mAdapter = new ArrayAdapter<Lobby>(this, R.layout.lobby_list_item, R.id.textView);
+        mAdapter = new ArrayAdapter<NetAddress>(this, R.layout.lobby_list_item, R.id.textView);
         listView.setAdapter(mAdapter);
         findViewById(R.id.buttonRefresh).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,10 +123,10 @@ public class LobbyBrowserActivity extends Activity{
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
-                Lobby lobby = mAdapter.getItem(pos);
+                NetAddress netAddress = mAdapter.getItem(pos);
                 Intent i = new Intent(LobbyBrowserActivity.this, GameActivity.class);
                 i.putExtra("action", "join");
-                i.putExtra("lobby", lobby);
+                i.putExtra("lobby", new Lobby(netAddress.srcAddress, netAddress.srcPort));
                 i.putExtra("sessionId", mSessionId);
                 i.putExtra("playerName", playerName);
                 i.putExtra("playerAvatar", playerAvatar);

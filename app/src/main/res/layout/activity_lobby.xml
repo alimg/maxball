@@ -14,7 +14,8 @@
             android:id="@+id/buttonRefresh"
             android:layout_gravity="center_horizontal|top"
             android:layout_toEndOf="@+id/buttonCreate"
-            android:layout_alignParentTop="true" />
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/buttonCreate" />
 
         <Button
             android:layout_width="wrap_content"

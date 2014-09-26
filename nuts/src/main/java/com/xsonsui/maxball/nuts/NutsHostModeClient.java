@@ -20,7 +20,7 @@ public class NutsHostModeClient extends Thread{
     @Override
     public void run() {
         try {
-            DatagramSocket socket = new DatagramSocket(null);
+            DatagramSocket socket = new DatagramSocket(29071);
             socket.setSoTimeout(10000);
             mSocket = socket;
             senderThread = new SenderThread(socket);
@@ -57,16 +57,17 @@ public class NutsHostModeClient extends Thread{
                 try {
                     socket.receive(responsePacket);
                     response = NutsMessage.deserialize(responsePacket.getData());
-/*
-                    System.out.println("Response from " +
+
+                    System.out.println("(Server) Response from " +
                             responsePacket.getAddress() + ": " + responsePacket.getPort() +
-                            " <" + response.message + ">");*/
+                            " <" + response.message + ">");
 
                     if (response.message.equals("incoming connection")) {
                         System.out.println("Sending hello "+response.address.toString()+":"+response.port);
-                        requestPacket.setAddress(response.address);
+                        requestPacket.setAddress(InetAddress.getByAddress(response.address.getAddress()));
                         requestPacket.setPort(response.port);
                         requestPacket.setData(NutsMessage.serialize(new NutsMessage("hello", null, 0)));
+                        socket.send(requestPacket);
                         socket.send(requestPacket);
                     } else if (response.message.equals("hello")) {
                         requestPacket.setAddress(responsePacket.getAddress());
@@ -77,6 +78,10 @@ public class NutsHostModeClient extends Thread{
                         System.out.println("Ping to nuts: "+(System.currentTimeMillis()-lastPingSent));
                     } else {
                         listener.onResponse(response, new NetAddress(responsePacket.getAddress(), responsePacket.getPort()));
+                    }
+                    if (System.currentTimeMillis()-lastPingSent > 10000) {
+                        socket.send(pingPacket);
+                        lastPingSent = System.currentTimeMillis();
                     }
                 } catch (SocketTimeoutException e) {
                     //listener.onDisconnected();

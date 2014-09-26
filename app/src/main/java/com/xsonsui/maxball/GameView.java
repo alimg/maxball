@@ -79,8 +79,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
             canvas.drawRect(0,0,width,height, paintWhite);
             canvas.translate(width/2.0f, height/2.0f);
-            canvas.scale(1.0f/width, 1.0f/width);
-            canvas.scale(Game.ARENA_WIDTH_2*7.5f, Game.ARENA_WIDTH_2*7.5f);
+            canvas.scale(width/Game.ARENA_WIDTH_2/2, width/Game.ARENA_WIDTH_2/2);
             canvas.drawRect(-Game.ARENA_WIDTH_2, -Game.ARENA_HEIGHT_2,Game.ARENA_WIDTH_2, Game.ARENA_HEIGHT_2, paintGreen);
             synchronized (game) {
                 for (Player p : game.players.values()) {

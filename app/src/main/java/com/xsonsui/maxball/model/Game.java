@@ -12,7 +12,7 @@ public class Game implements Serializable {
     public static final float ARENA_HEIGHT_2 = 150;
     public static final float ARENA_WIDTH_2 = 300;
     public Map<String, Player> players = new HashMap<String, Player>();
-    public Ball ball;
+    public Ball ball = new Ball();
 
     public int gameState;
 

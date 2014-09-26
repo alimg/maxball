@@ -47,6 +47,10 @@ public class SenderThread extends Thread {
         }
     }
 
+    public void stopThread() {
+
+    }
+
     private class MessagePair{
         public NetAddress address;
         public NutsMessage message;

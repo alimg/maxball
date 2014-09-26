@@ -39,7 +39,7 @@ public class GameThread extends Thread{
             long newTime = System.currentTimeMillis();
             double frameTime = (newTime - currentTime)/1000.0;
             if(currentTime/1000!=newTime/1000) {
-                Log.d("GameThread", "fps: " + frameCount + " acc: " + accumulator);
+                Log.v("GameThread", "fps: " + frameCount + " acc: " + accumulator);
                 frameCount=0;
             }
             currentTime = newTime;
