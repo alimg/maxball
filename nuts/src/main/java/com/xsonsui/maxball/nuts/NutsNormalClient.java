@@ -11,12 +11,15 @@ import java.net.UnknownHostException;
 
 public class NutsNormalClient extends Thread{
 
+    private final InetAddress peerIp;
+    private final int peerPort;
     private InetAddress serverIp;
     private int serverPort;
     private final NutsClientListener listener;
     private boolean connected;
     private DatagramSocket mSocket;
     private SenderThread senderThread;
+    private boolean p2pAvailable;
 
     public NutsNormalClient(InetAddress serverIp, int serverPort, NutsClientListener listener) {
         try {
@@ -26,11 +29,15 @@ public class NutsNormalClient extends Thread{
         }
         this.serverPort = serverPort;
         this.listener = listener;
+
+        this.peerIp = serverIp;
+        this.peerPort = serverPort;
         System.out.println("client created "+serverIp.toString()+":"+serverPort);
     }
 
     @Override
     public void run() {
+        setName("NormalClientThread");
         DatagramSocket socket = null;
         try {
             socket = new DatagramSocket(null);
@@ -44,9 +51,10 @@ public class NutsNormalClient extends Thread{
             ReceiverThread receiverThread = new ReceiverThread(mSocket);
             receiverThread.start();
             int retryCount = 0;
+            p2pAvailable = false;
             while (!connected) {
                 try {
-                    if(retryCount%4==0) {
+                    if(retryCount%2==0) {
                         requestPacket.setAddress(InetAddress.getByName(NutsConstants.NUTS_SERVER_IP));
                         requestPacket.setPort(NutsConstants.NUTS_SERVER_PORT);
                         requestPacket.setData(NutsMessage.serialize(new NutsMessage("connect me", serverIp, serverPort)));
@@ -83,23 +91,32 @@ public class NutsNormalClient extends Thread{
                                 " <" + response.message + ">");
                         if (response.message.equals("i hear you")) {
                             connected = true;
+                            p2pAvailable = true;
                             System.out.println("Connection established");
                         } else {
                             retryCount ++;
                         }
                     } else if (response.message.equals("i hear you")) {
                         connected = true;
+                        p2pAvailable = true;
                         System.out.println("Connection established");
                     }
                 } catch (SocketTimeoutException e) {
                     System.out.println("Unable to reach server retrying");
                     retryCount ++;
-                    if (retryCount >= 16) {
-                        break;
+                    if (retryCount >= 3) {
+                        p2pAvailable = false;
+                        connected = true;
+                        System.out.print("Unable punch a UDP hole");
                     }
                 }
             }
-            socket.setSoTimeout(10000);
+            if (!p2pAvailable){
+                //TODO get a dedicated server for packet redirection from somewhere.
+                // We just use the main server for now.
+                serverIp = InetAddress.getByName(NutsConstants.NUTS_SERVER_IP);
+                serverPort = NutsConstants.NUTS_SERVER_PORT;
+            }
             listener.onConnected(null, 0);
 
             while (connected) {
@@ -107,9 +124,10 @@ public class NutsNormalClient extends Thread{
                     responsePacket = receiverThread.receive();
                     NutsMessage response = NutsMessage.deserialize(responsePacket.getData());
 
-                    listener.onResponse(response, new NetAddress(responsePacket.getAddress(), responsePacket.getPort()));
-                } catch (SocketTimeoutException e) {
-
+                    listener.onResponse(response, new NetAddress(responsePacket.getAddress(), responsePacket.getPort()), p2pAvailable);
+                } catch (Exception e) {
+                    System.err.println("Corrupted packet received");
+                    //e.printStackTrace();
                 }
             }
 
@@ -128,6 +146,10 @@ public class NutsNormalClient extends Thread{
     }
 
     public void sendMessage(NutsMessage message) {
-        senderThread.send(new NetAddress(serverIp, serverPort), message);
+        if(p2pAvailable) {
+            senderThread.send(new NetAddress(serverIp, serverPort), message);
+        } else {
+            senderThread.send(new NetAddress(serverIp, serverPort), new NutsMessage("redirect", peerIp, peerPort, message));
+        }
     }
 }

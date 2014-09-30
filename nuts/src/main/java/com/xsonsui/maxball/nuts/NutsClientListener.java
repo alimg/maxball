@@ -8,6 +8,6 @@ public interface NutsClientListener {
 
     void onDisconnected();
 
-    public void onResponse(NutsMessage response, NetAddress address);
+    public void onResponse(NutsMessage response, NetAddress address, boolean p2p);
 
 }

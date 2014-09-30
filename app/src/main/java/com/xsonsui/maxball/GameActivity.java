@@ -16,7 +16,7 @@ import com.xsonsui.maxball.nuts.NutsNormalClient;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class GameActivity extends Activity{
+public class GameActivity extends Activity implements GameHost.GameConnectionListener {
 
     private static final String TAG = "GameActivity";
     private GameThread gameThread;
@@ -43,7 +43,7 @@ public class GameActivity extends Activity{
         String playerAvatar = extras.getString("playerName");
 
         gameThread = new GameThread(mGame, gameView);
-        gameClient = new GameClient(this, gameThread, playerName, playerAvatar, action.equals("host"));
+        gameClient = new GameClient(gameThread, playerName, playerAvatar, action.equals("host"));
         if (action.equals("join")) {
             Lobby lobby = (Lobby) extras.getSerializable("lobby");
             NutsNormalClient client = null;
@@ -67,6 +67,7 @@ public class GameActivity extends Activity{
         gameThread.start();
     }
 
+    @Override
     public void connectToLocalHost(final InetAddress publicAddress, final int publicPort) {
         mHandler.post(new Runnable() {
             @Override

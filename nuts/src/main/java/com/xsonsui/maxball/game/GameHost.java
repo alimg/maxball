@@ -1,11 +1,5 @@
 package com.xsonsui.maxball.game;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-
-import com.xsonsui.maxball.GameActivity;
-import com.xsonsui.maxball.GameView;
 import com.xsonsui.maxball.model.Game;
 import com.xsonsui.maxball.model.GameUpdate;
 import com.xsonsui.maxball.model.Input;
@@ -18,19 +12,22 @@ import com.xsonsui.maxball.nuts.NutsMessage;
 
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by alim on 9/14/14.
  */
 public class GameHost implements NutsClientListener, GameThread.GameUpdateListener {
     private static final String TAG = "GameHost";
-    private final GameActivity gameActivity;
+    private final GameConnectionListener gameActivity;
     private final GameThread gameThread;
     private NutsHostModeClient client;
     private Map<NetAddress, String> playerMap = new HashMap<NetAddress, String>();
+    private Set<NetAddress> playerP2PMap = new HashSet<NetAddress>();
 
-    public GameHost(GameActivity gameActivity, GameThread gameThread) {
+    public GameHost(GameConnectionListener gameActivity, GameThread gameThread) {
         this.gameActivity = gameActivity;
         this.gameThread = gameThread;
         gameThread.setGameUpdateListener(this);
@@ -43,7 +40,7 @@ public class GameHost implements NutsClientListener, GameThread.GameUpdateListen
 
     @Override
     public void onConnected(InetAddress publicAddress, int publicPort) {
-        Log.d(TAG, "Connected to nuts: " + publicAddress.toString() + ":" + publicPort);
+        System.out.println(TAG + ": Connected to nuts: " + publicAddress.toString() + ":" + publicPort);
         gameActivity.connectToLocalHost(publicAddress, publicPort);
     }
 
@@ -53,27 +50,24 @@ public class GameHost implements NutsClientListener, GameThread.GameUpdateListen
     }
 
     @Override
-    public void onResponse(final NutsMessage response, final NetAddress address) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                if (response.message.equals("join")) {
-                    JoinRequest joinRequest = (JoinRequest) response.data;
-                    if(!playerMap.containsKey(address)) {
-                        Player player = new Player(joinRequest.name);
-                        player.avatar = joinRequest.avatar;
-                        player.team = "b";
-                        player.position.set(-100,0);
-                        gameThread.addPlayer(player);
-                        playerMap.put(address, player.name);
-                        Log.d(TAG, "Player joined "+address.toString());
-                    }
-                } else if (response.message.equals("input")) {
-                    Input input = (Input) response.data;
-                    gameThread.input(playerMap.get(address), input);
-                }
+    public void onResponse(final NutsMessage response, final NetAddress address, final boolean p2p) {
+        if (response.message.equals("join")) {
+            JoinRequest joinRequest = (JoinRequest) response.data;
+            if(!playerMap.containsKey(address)) {
+                Player player = new Player(joinRequest.name);
+                player.avatar = joinRequest.avatar;
+                player.team = "b";
+                player.position.set(-100, 0);
+                gameThread.addPlayer(player);
+                playerMap.put(address, player.name);
+                if(p2p)
+                    playerP2PMap.add(address);
+                System.out.println(TAG+ ": Player joined "+address.toString());
             }
-        });
+        } else if (response.message.equals("input")) {
+            Input input = (Input) response.data;
+            gameThread.input(playerMap.get(address), input);
+        }
     }
 
     @Override
@@ -84,8 +78,12 @@ public class GameHost implements NutsClientListener, GameThread.GameUpdateListen
             message.data = update;
 
             for (NetAddress addr : playerMap.keySet()) {
-                client.sendMessage(addr, message);
+                client.sendMessage(addr, message, playerP2PMap.contains(addr));
             }
         }
+    }
+
+    public interface GameConnectionListener {
+        public void connectToLocalHost(InetAddress publicAddress, int publicPort);
     }
 }

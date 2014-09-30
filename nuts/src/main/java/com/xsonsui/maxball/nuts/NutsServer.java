@@ -35,10 +35,10 @@ public class NutsServer extends Thread{
                     try {
                         NutsMessage reqData = NutsMessage.deserialize(data);
 
-                        System.out.println("Message from " +
+                        /*System.out.println("Message from " +
                                 packet.getAddress().toString() + ": " + packet.getPort() +
                                 " <" + reqData.message + ">");
-
+*/
                         if (reqData.message.equals("register me")) {
                             outPacket.setAddress(address);
                             outPacket.setPort(port);
@@ -61,8 +61,18 @@ public class NutsServer extends Thread{
                             outPacket.setPort(port);
                             outPacket.setData(NutsMessage.serialize(new NutsMessage("server list", address, port, new ArrayList<NetAddress>(mHosts.keySet()))));
                             socket.send(outPacket);
+                        } else if (reqData.message.equals("redirect")) {
+                            outPacket.setAddress(InetAddress.getByAddress(reqData.address.getAddress()));
+                            outPacket.setPort(reqData.port);
+                            NutsMessage message = ((NutsMessage) reqData.data);
+                            message.address = address;
+                            message.port = port;
+                            outPacket.setData(NutsMessage.serialize(message));
+                            socket.send(outPacket);
                         }
                     } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (ClassCastException e) {
                         e.printStackTrace();
                     }
 

@@ -1,7 +1,5 @@
 package com.xsonsui.maxball.game;
 
-import com.xsonsui.maxball.GameActivity;
-import com.xsonsui.maxball.GameView;
 import com.xsonsui.maxball.model.GameUpdate;
 import com.xsonsui.maxball.model.Input;
 import com.xsonsui.maxball.model.JoinRequest;
@@ -10,14 +8,12 @@ import com.xsonsui.maxball.nuts.NutsClientListener;
 import com.xsonsui.maxball.nuts.NutsMessage;
 import com.xsonsui.maxball.nuts.NutsNormalClient;
 
-import java.io.Serializable;
 import java.net.InetAddress;
 
 /**
  * Created by alim on 9/14/14.
  */
-public class GameClient implements NutsClientListener, GameView.GameInputListener {
-    private final GameActivity gameActivity;
+public class GameClient implements NutsClientListener, GameInputListener {
     private final GameThread gameThread;
     private final String playerName;
     private final String playerAvatar;
@@ -25,8 +21,7 @@ public class GameClient implements NutsClientListener, GameView.GameInputListene
     private NutsNormalClient client;
     private Input mInput = new Input();
 
-    public GameClient(GameActivity activity, GameThread gameThread, String playerName, String playerAvatar, boolean isLocalGame) {
-        this.gameActivity = activity;
+    public GameClient(GameThread gameThread, String playerName, String playerAvatar, boolean isLocalGame) {
         this.gameThread = gameThread;
         this.playerName = playerName;
         this.playerAvatar = playerAvatar;
@@ -50,7 +45,7 @@ public class GameClient implements NutsClientListener, GameView.GameInputListene
     }
 
     @Override
-    public void onResponse(NutsMessage response, NetAddress address) {
+    public void onResponse(NutsMessage response, NetAddress address, boolean p2p) {
         if(response.message.equals("update") && !isLocalGame){
             GameUpdate update = (GameUpdate) response.data;
             gameThread.updateGame(update);

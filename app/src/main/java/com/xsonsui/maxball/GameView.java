@@ -6,16 +6,17 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.xsonsui.maxball.game.GameInputListener;
+import com.xsonsui.maxball.game.GameViewInterface;
 import com.xsonsui.maxball.model.Ball;
 import com.xsonsui.maxball.model.Game;
 import com.xsonsui.maxball.model.Player;
 
-public class GameView extends SurfaceView implements SurfaceHolder.Callback {
+public class GameView extends SurfaceView implements SurfaceHolder.Callback, GameViewInterface {
 
     private RectF rect = new RectF();
     private Paint paintRed = new Paint();
@@ -149,8 +150,4 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         this.ready = false;
     }
 
-    public interface GameInputListener {
-        public void inputMove(float x, float y);
-        public void inputKick(float p);
-    }
 }

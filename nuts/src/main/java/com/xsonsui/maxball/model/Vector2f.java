@@ -1,7 +1,5 @@
 package com.xsonsui.maxball.model;
 
-import android.util.FloatMath;
-
 import java.io.Serializable;
 
 /**
@@ -22,7 +20,7 @@ public class Vector2f implements Serializable{
     }
 
     public float distance(Vector2f position) {
-        return FloatMath.sqrt((x - position.x) * (x - position.x) +
+        return (float) Math.sqrt((x - position.x) * (x - position.x) +
                 (y - position.y) * (y - position.y));
     }
 
@@ -38,7 +36,7 @@ public class Vector2f implements Serializable{
     }
 
     private float length() {
-        return FloatMath.sqrt(x * x + y * y);
+        return (float) Math.sqrt(x * x + y * y);
     }
 
     public void multiply(float k) {

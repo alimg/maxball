@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class NutsMessage implements Serializable {
     public String message;
@@ -28,12 +30,18 @@ public class NutsMessage implements Serializable {
     }
 
     public static NutsMessage deserialize(byte[] data) throws IOException, ClassNotFoundException {
-        return (NutsMessage) new ObjectInputStream(new ByteArrayInputStream(data)).readObject();
+        try {
+            return (NutsMessage) new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(data))).readObject();
+        } catch (ArrayIndexOutOfBoundsException e){
+            throw new IOException(e);
+        }
     }
 
     public static byte[] serialize(NutsMessage request) throws IOException, ClassNotFoundException {
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        new ObjectOutputStream(outStream).writeObject(request);
+        GZIPOutputStream gzipStream = new GZIPOutputStream(outStream);
+        new ObjectOutputStream(gzipStream).writeObject(request);
+        gzipStream.close();
         return outStream.toByteArray();
     }
 

@@ -2,10 +2,8 @@ package com.xsonsui.maxball;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.xsonsui.maxball.model.Lobby;
-import com.xsonsui.maxball.model.Player;
 import com.xsonsui.maxball.nuts.NetAddress;
 import com.xsonsui.maxball.nuts.NutsConstants;
 import com.xsonsui.maxball.nuts.NutsMessage;

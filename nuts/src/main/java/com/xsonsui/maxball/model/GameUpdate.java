@@ -1,8 +1,6 @@
 package com.xsonsui.maxball.model;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * Created by alim on 9/12/14.

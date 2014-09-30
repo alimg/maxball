@@ -13,12 +13,15 @@ public class NutsHostModeClient extends Thread{
     private long lastPingSent;
     private DatagramSocket mSocket;
     private SenderThread senderThread;
+    private InetAddress nutsServerIp;
+    private NetAddress nutsServerAddress;
 
     public NutsHostModeClient(NutsClientListener listener) {
         this.listener = listener;
     }
     @Override
     public void run() {
+        setName("HostThread");
         try {
             DatagramSocket socket = new DatagramSocket(29071);
             socket.setSoTimeout(10000);
@@ -30,7 +33,10 @@ public class NutsHostModeClient extends Thread{
             DatagramPacket responsePacket = new DatagramPacket(new byte[1024], 1024);
             DatagramPacket pingPacket = new DatagramPacket(new byte[1024], 1024);
 
-            pingPacket.setAddress(InetAddress.getByName(NutsConstants.NUTS_SERVER_IP));
+            nutsServerIp = InetAddress.getByName(NutsConstants.NUTS_SERVER_IP);
+            nutsServerAddress = new NetAddress(nutsServerIp, NutsConstants.NUTS_SERVER_PORT);
+
+            pingPacket.setAddress(nutsServerIp);
             pingPacket.setPort(NutsConstants.NUTS_SERVER_PORT);
             pingPacket.setData(NutsMessage.serialize(new NutsMessage("ping", null, 0)));
 
@@ -57,27 +63,31 @@ public class NutsHostModeClient extends Thread{
                 try {
                     socket.receive(responsePacket);
                     response = NutsMessage.deserialize(responsePacket.getData());
-
+/*
                     System.out.println("(Server) Response from " +
                             responsePacket.getAddress() + ": " + responsePacket.getPort() +
-                            " <" + response.message + ">");
+                            " <" + response.message + ">");*/
 
-                    if (response.message.equals("incoming connection")) {
-                        System.out.println("Sending hello "+response.address.toString()+":"+response.port);
-                        requestPacket.setAddress(InetAddress.getByAddress(response.address.getAddress()));
-                        requestPacket.setPort(response.port);
-                        requestPacket.setData(NutsMessage.serialize(new NutsMessage("hello", null, 0)));
-                        socket.send(requestPacket);
-                        socket.send(requestPacket);
-                    } else if (response.message.equals("hello")) {
-                        requestPacket.setAddress(responsePacket.getAddress());
-                        requestPacket.setPort(responsePacket.getPort());
-                        requestPacket.setData(NutsMessage.serialize(new NutsMessage("i hear you", null, 0)));
-                        socket.send(requestPacket);
-                    } else if (response.message.equals("pong")){
-                        System.out.println("Ping to nuts: "+(System.currentTimeMillis()-lastPingSent));
-                    } else {
-                        listener.onResponse(response, new NetAddress(responsePacket.getAddress(), responsePacket.getPort()));
+                    if(responsePacket.getAddress().equals(nutsServerIp)) {
+                        if (response.message.equals("incoming connection")) {
+                            System.out.println("Sending hello " + response.address.toString() + ":" + response.port);
+                            requestPacket.setAddress(InetAddress.getByAddress(response.address.getAddress()));
+                            requestPacket.setPort(response.port);
+                            requestPacket.setData(NutsMessage.serialize(new NutsMessage("hello", null, 0)));
+                            socket.send(requestPacket);
+                            socket.send(requestPacket);
+                        } else if (response.message.equals("hello")) {
+                            requestPacket.setAddress(responsePacket.getAddress());
+                            requestPacket.setPort(responsePacket.getPort());
+                            requestPacket.setData(NutsMessage.serialize(new NutsMessage("i hear you", null, 0)));
+                            socket.send(requestPacket);
+                        } else if (response.message.equals("pong")) {
+                            System.out.println("Ping to nuts: " + (System.currentTimeMillis() - lastPingSent));
+                        } else {
+                            listener.onResponse(response, new NetAddress(response.address, response.port), false);
+                        }
+                    }else {
+                        listener.onResponse(response, new NetAddress(responsePacket.getAddress(), responsePacket.getPort()), true);
                     }
                     if (System.currentTimeMillis()-lastPingSent > 10000) {
                         socket.send(pingPacket);
@@ -104,7 +114,9 @@ public class NutsHostModeClient extends Thread{
         running = false;
     }
 
-    public void sendMessage(NetAddress address, NutsMessage message) {
-        senderThread.send(address, message);
+    public void sendMessage(NetAddress address, NutsMessage message, boolean peer2peer) {
+        if (peer2peer)
+            senderThread.send(address, message);
+        else senderThread.send(nutsServerAddress, new NutsMessage("redirect", address.srcAddress, address.srcPort, message));
     }
 }

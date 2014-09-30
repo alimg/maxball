@@ -27,6 +27,9 @@ public class SenderThread extends Thread {
                 packet.setPort(mp.address.srcPort);
                 try {
                     packet.setData(NutsMessage.serialize(mp.message));
+                    if(packet.getData().length>1400){
+                        System.err.println("Packet size is too high: " + packet.getData().length);
+                    }
                     mSocket.send(packet);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();

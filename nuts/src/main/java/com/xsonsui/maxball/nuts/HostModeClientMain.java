@@ -20,7 +20,7 @@ public class HostModeClientMain {
             }
 
             @Override
-            public void onResponse(NutsMessage response, NetAddress address) {
+            public void onResponse(NutsMessage response, NetAddress address, boolean b) {
 
             }
         }).start();

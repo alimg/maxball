@@ -1,8 +1,5 @@
 package com.xsonsui.maxball.game;
 
-import android.util.Log;
-
-import com.xsonsui.maxball.GameView;
 import com.xsonsui.maxball.model.Game;
 import com.xsonsui.maxball.model.GameUpdate;
 import com.xsonsui.maxball.model.Input;
@@ -12,13 +9,13 @@ public class GameThread extends Thread{
 
     private static final String TAG = "GameThread";
     private final Game mGame;
-    private final GameView view;
+    private final GameViewInterface view;
     private boolean running = true;
     private GameUpdateListener gameUpdateListener;
     private boolean paused = false;
     private Object pauseObj = new Object();
 
-    public GameThread(Game game, GameView view) {
+    public GameThread(Game game, GameViewInterface view) {
         mGame = game;
         this.view = view;
     }
@@ -39,7 +36,7 @@ public class GameThread extends Thread{
             long newTime = System.currentTimeMillis();
             double frameTime = (newTime - currentTime)/1000.0;
             if(currentTime/1000!=newTime/1000) {
-                Log.v("GameThread", "fps: " + frameCount + " acc: " + accumulator);
+                System.out.println("GameThread: fps: " + frameCount + " acc: " + accumulator);
                 frameCount=0;
             }
             currentTime = newTime;
@@ -99,7 +96,7 @@ public class GameThread extends Thread{
             if(mGame.players.containsKey(playerName))
                 mGame.players.get(playerName).input = input;
             else {
-                Log.e(TAG, "player "+playerName+ " not found");
+                System.out.println(TAG+": player "+playerName+ " not found");
             }
         }
     }

@@ -17,12 +17,12 @@ public class ReceiverThread extends Thread {
     private byte[] buffer = new byte[4096];
     private LinkedBlockingQueue<DatagramPacket> mQueue = new LinkedBlockingQueue<DatagramPacket>();
 
-
     public ReceiverThread(DatagramSocket socket) {
         mSocket = socket;
     }
     @Override
     public void run() {
+        setName("ReceiverThread");
         while (running) {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             try {
