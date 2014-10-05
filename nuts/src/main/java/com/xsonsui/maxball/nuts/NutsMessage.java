@@ -17,6 +17,10 @@ public class NutsMessage implements Serializable {
 
     public Serializable data;
 
+    public transient InetAddress srcAddress;
+    public transient int srcPort;
+    public transient int sequenceNo;
+
     public NutsMessage(String request, InetAddress address, int port) {
         this.message = request;
         this.address = address;
@@ -30,10 +34,25 @@ public class NutsMessage implements Serializable {
     }
 
     public static NutsMessage deserialize(byte[] data) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bstream = null;
+        GZIPInputStream gzstream = null;
+        ObjectInputStream obstream = null;
         try {
-            return (NutsMessage) new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(data))).readObject();
-        } catch (ArrayIndexOutOfBoundsException e){
+
+            bstream = new ByteArrayInputStream(data);
+            gzstream = new GZIPInputStream(bstream);
+            obstream = new ObjectInputStream(gzstream);
+            NutsMessage message = (NutsMessage) obstream.readObject();
+            return message;
+        } catch (ArrayIndexOutOfBoundsException e) {
             throw new IOException(e);
+        } finally {
+            if (bstream != null)
+                bstream.close();
+            if (gzstream != null)
+                gzstream.close();
+            if (obstream != null)
+                obstream.close();
         }
     }
 

@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -17,9 +18,9 @@ public class NutsNormalClient extends Thread{
     private int serverPort;
     private final NutsClientListener listener;
     private boolean connected;
-    private DatagramSocket mSocket;
     private SenderThread senderThread;
     private boolean p2pAvailable;
+    private int droppedPackets;
 
     public NutsNormalClient(InetAddress serverIp, int serverPort, NutsClientListener listener) {
         try {
@@ -42,52 +43,38 @@ public class NutsNormalClient extends Thread{
         try {
             socket = new DatagramSocket(null);
             socket.setSoTimeout(3000);
-            mSocket = socket;
             senderThread = new SenderThread(socket);
             senderThread.start();
-
-            DatagramPacket requestPacket = new DatagramPacket(new byte[1024], 1024);
-            DatagramPacket responsePacket;
-            ReceiverThread receiverThread = new ReceiverThread(mSocket);
+            ReceiverThread receiverThread = new ReceiverThread(socket);
             receiverThread.start();
             int retryCount = 0;
             p2pAvailable = false;
             while (!connected) {
                 try {
                     if(retryCount%2==0) {
-                        requestPacket.setAddress(InetAddress.getByName(NutsConstants.NUTS_SERVER_IP));
-                        requestPacket.setPort(NutsConstants.NUTS_SERVER_PORT);
-                        requestPacket.setData(NutsMessage.serialize(new NutsMessage("connect me", serverIp, serverPort)));
-                        System.out.println("len 1 "+requestPacket.getLength());
-                        socket.send(requestPacket);
+                        senderThread.send(new NetAddress(
+                                InetAddress.getByName(NutsConstants.NUTS_SERVER_IP),
+                                NutsConstants.NUTS_SERVER_PORT),
+                                new NutsMessage("connect me", serverIp, serverPort));
                     }
 
-                    requestPacket.setAddress(serverIp);
-                    requestPacket.setPort(serverPort);
-                    requestPacket.setData(NutsMessage.serialize(new NutsMessage("hello", null, 0)));
-                    System.out.println("len 2 "+requestPacket.getLength());
-                    socket.send(requestPacket);
+                    senderThread.send(new NetAddress(serverIp, serverPort),
+                            new NutsMessage("hello", null, 0));
 
-
-                    responsePacket = receiverThread.receive();
-                    NutsMessage response = NutsMessage.deserialize(responsePacket.getData());
+                    NutsMessage response = receiverThread.receive(3);
 
                     System.out.println("(Client) Response from " +
-                            responsePacket.getAddress() + ": " + responsePacket.getPort() +
+                            response.srcAddress + ": " + response.srcPort +
                             " <" + response.message + ">");
 
                     if (response.message.equals("hello")) {
+                        senderThread.send(new NetAddress(response.srcAddress, response.srcPort),
+                                new NutsMessage("hello", null, 0));
 
-                        requestPacket.setAddress(responsePacket.getAddress());
-                        requestPacket.setPort(responsePacket.getPort());
-                        requestPacket.setData(NutsMessage.serialize(new NutsMessage("hello", null, 0)));
-                        socket.send(requestPacket);
-
-                        responsePacket = receiverThread.receive();
-                        response = NutsMessage.deserialize(responsePacket.getData());
+                        response = receiverThread.receive(3);
 
                         System.out.println("Response from " +
-                                responsePacket.getAddress() + ": " + responsePacket.getPort() +
+                                response.srcAddress + ": " + response.srcPort +
                                 " <" + response.message + ">");
                         if (response.message.equals("i hear you")) {
                             connected = true;
@@ -107,7 +94,7 @@ public class NutsNormalClient extends Thread{
                     if (retryCount >= 3) {
                         p2pAvailable = false;
                         connected = true;
-                        System.out.print("Unable punch a UDP hole");
+                        System.out.println("Unable punch UDP hole");
                     }
                 }
             }
@@ -119,21 +106,22 @@ public class NutsNormalClient extends Thread{
             }
             listener.onConnected(null, 0);
 
+            int prevSeqNo=0;
             while (connected) {
                 try {
-                    responsePacket = receiverThread.receive();
-                    NutsMessage response = NutsMessage.deserialize(responsePacket.getData());
+                    NutsMessage response = receiverThread.receive(3);
+                    if(response.sequenceNo>prevSeqNo || response.sequenceNo<10) {
+                        listener.onResponse(response, new NetAddress(response.srcAddress, response.srcPort), p2pAvailable);
+                        prevSeqNo = response.sequenceNo;
+                    } else {
+                        droppedPackets++;
+                    }
+                } catch (SocketTimeoutException e ){
 
-                    listener.onResponse(response, new NetAddress(responsePacket.getAddress(), responsePacket.getPort()), p2pAvailable);
-                } catch (Exception e) {
-                    System.err.println("Corrupted packet received");
-                    //e.printStackTrace();
                 }
             }
 
         } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
