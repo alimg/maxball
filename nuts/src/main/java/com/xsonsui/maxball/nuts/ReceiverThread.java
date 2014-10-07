@@ -36,8 +36,8 @@ public class ReceiverThread extends Thread {
 
                 header = NutsPacket.processHeader(packet.getData());
                 long seqHash = header.seqNo;
-                seqHash = seqHash*103 + packet.getAddress().hashCode();
-                seqHash = seqHash*103 +packet.getPort();
+                seqHash = seqHash*100293971 + packet.getAddress().hashCode();
+                seqHash = seqHash*100293971 + packet.getPort();
                 if (!packetCache.containsKey(seqHash)) {
                     packetCache.put(seqHash, new ArrayList<NutsPacket>(header.parts));
                 }
@@ -60,6 +60,7 @@ public class ReceiverThread extends Thread {
                         message.srcPort = packet.getPort();
                         message.sequenceNo = header.seqNo;
                         mQueue.offer(message);
+                        packetCache.remove(seqHash);
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }

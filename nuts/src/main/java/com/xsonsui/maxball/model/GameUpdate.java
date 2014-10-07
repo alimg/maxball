@@ -25,8 +25,10 @@ public class GameUpdate implements Serializable{
         game.scoreBlue = scoreBlue;
         game.scoreRed = scoreRed;
         game.ball = ball;
+        ball.force = new Vector2f();
         game.players.clear();
         for(Player p: players) {
+            p.force = new Vector2f();
             game.players.put(p.name, p);
         }
     }

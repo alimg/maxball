@@ -62,7 +62,7 @@ public class GameHost implements NutsClientListener, GameThread.GameUpdateListen
                 playerMap.put(address, player.name);
                 if(p2p)
                     playerP2PMap.add(address);
-                System.out.println(TAG+ ": Player joined "+address.toString());
+                System.out.println(TAG+ ": Player joined "+address.toString() + " P2P: " + p2p);
             }
         } else if (response.message.equals("input")) {
             Input input = (Input) response.data;

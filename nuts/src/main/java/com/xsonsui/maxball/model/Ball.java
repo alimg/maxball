@@ -10,22 +10,20 @@ public class Ball implements Serializable{
     public float radius;
     public Vector2f speed;
 
-    public Vector2f force;
+    public transient Vector2f force = new Vector2f();
     public float mass;
     public float k;
 
     public Ball(){
         position = new Vector2f();
         speed = new Vector2f();
-        force = new Vector2f();
         radius= 16;
         mass = 0.5f;
         k = 2000f;
     }
 
-    Vector2f f = new Vector2f();
     public void addForce(Vector2f pivot, float v) {
-        f.set(position.x - pivot.x, position.y - pivot.y);
+        Vector2f f = new Vector2f(position.x - pivot.x, position.y - pivot.y);
         f.normalize();
         f.multiply((radius - v) * k);
         force.add(f);
