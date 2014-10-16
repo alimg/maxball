@@ -15,6 +15,7 @@ public class NutsHostModeClient extends Thread{
     private InetAddress nutsServerIp;
     private NetAddress nutsServerAddress;
     private ReceiverThread receiverThread;
+    private DatagramSocket socket;
 
     public NutsHostModeClient(NutsClientListener listener) {
         this.listener = listener;
@@ -23,7 +24,7 @@ public class NutsHostModeClient extends Thread{
     public void run() {
         setName("HostThread");
         try {
-            DatagramSocket socket = new DatagramSocket(29071);
+            socket = new DatagramSocket(29071);
             socket.setSoTimeout(10000);
             senderThread = new SenderThread(socket);
             senderThread.start();
@@ -40,7 +41,7 @@ public class NutsHostModeClient extends Thread{
             NutsMessage response = null;
             while (!connected) {
                 response = receiverThread.receive(30);
-                System.out.println("Response form nuts " +
+                System.out.println("Response from nuts " +
                         response.srcAddress + ": " + response.srcPort +
                         " <" + response.message + ">");
                 if(response.message.equals("you are")) {
@@ -95,6 +96,9 @@ public class NutsHostModeClient extends Thread{
 
     public void stopThread() {
         running = false;
+        senderThread.stopThread();
+        receiverThread.stopThread();
+        socket.close();
     }
 
     public void sendMessage(NetAddress address, NutsMessage message, boolean peer2peer) {

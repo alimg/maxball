@@ -22,7 +22,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
     private Paint paintRed = new Paint();
     private Paint paintGray = new Paint();
     private Paint paintGreen = new Paint();
+    private Paint paintLRed = new Paint();
+    private Paint paintLBlue = new Paint();
+    private Paint paintBlue = new Paint();
     private Paint paintWhite = new Paint();
+    private Paint paintBlack = new Paint();
     private float touchStartX;
     private float touchStartY;
     private int touchStartInd = -1;
@@ -50,8 +54,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
 
         paintGray.setColor(Color.GRAY);
         paintGreen.setColor(Color.GREEN);
+        paintLBlue.setColor(0xaa6666ff);
+        paintLRed.setColor(0xaaff6666);
         paintWhite.setColor(Color.WHITE);
+        paintBlack.setColor(Color.BLACK);
         paintRed.setColor(Color.RED);
+        paintBlue.setColor(Color.BLUE);
+
+        paintBlack.setTextSize(60);
     }
 
 
@@ -60,7 +70,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
                 p.position.y - p.radius,
                 p.position.x + p.radius,
                 p.position.y + p.radius);
-        canvas.drawOval(rect, paintRed);
+        if (p.team == Game.TEAM_RED)
+            canvas.drawOval(rect, paintRed);
+        else if (p.team == Game.TEAM_BLUE)
+            canvas.drawOval(rect, paintBlue);
     }
 
     private void drawBall(Canvas canvas, Ball p) {
@@ -77,11 +90,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
         }
         if(mHolder.getSurface().isValid()){
             Canvas canvas = mHolder.lockCanvas();
-
             canvas.drawRect(0,0,width,height, paintWhite);
+            canvas.drawText("Score: "+game.scoreRed+"-"+game.scoreBlue,0,100,paintBlack);
             canvas.translate(width/2.0f, height/2.0f);
             canvas.scale(width/Game.ARENA_WIDTH_2/2, width/Game.ARENA_WIDTH_2/2);
-            canvas.drawRect(-Game.ARENA_WIDTH_2, -Game.ARENA_HEIGHT_2,Game.ARENA_WIDTH_2, Game.ARENA_HEIGHT_2, paintGreen);
+            canvas.drawRect(-Game.ARENA_WIDTH_2, -Game.ARENA_HEIGHT_2, Game.ARENA_WIDTH_2, Game.ARENA_HEIGHT_2, paintGreen);
+            canvas.drawRect(-Game.ARENA_WIDTH_2, -Game.GOAL_AREA_SIZE,
+                    -Game.ARENA_WIDTH_2+Game.GOAL_AREA_SIZE, Game.GOAL_AREA_SIZE, paintLRed );
+            canvas.drawRect(Game.ARENA_WIDTH_2-0.0001f, -Game.GOAL_AREA_SIZE,
+                    Game.ARENA_WIDTH_2-Game.GOAL_AREA_SIZE, Game.GOAL_AREA_SIZE, paintLBlue );
             synchronized (game) {
                 for (Player p : game.players.values()) {
                     drawPlayer(canvas, p);
@@ -104,7 +121,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
         switch(action){
             case MotionEvent.ACTION_DOWN:
 
-                if(event.getX() < getWidth()/2) {
+                if(event.getX() < getWidth()*0.8) {
                     touchStartX = event.getX();
                     touchStartY = event.getY();
                     touchStartInd = event.getActionIndex();

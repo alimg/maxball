@@ -18,7 +18,7 @@ public class Ball implements Serializable{
         position = new Vector2f();
         speed = new Vector2f();
         radius= 16;
-        mass = 0.5f;
+        mass = 0.25f;
         k = 2000f;
     }
 

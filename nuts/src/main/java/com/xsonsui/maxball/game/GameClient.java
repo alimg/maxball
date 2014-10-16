@@ -9,6 +9,8 @@ import com.xsonsui.maxball.nuts.NutsMessage;
 import com.xsonsui.maxball.nuts.NutsNormalClient;
 
 import java.net.InetAddress;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by alim on 9/14/14.
@@ -20,6 +22,7 @@ public class GameClient implements NutsClientListener, GameInputListener {
     private final boolean isLocalGame;
     private NutsNormalClient client;
     private Input mInput = new Input();
+    private Timer mTimer = new Timer();
 
     public GameClient(GameThread gameThread, String playerName, String playerAvatar, boolean isLocalGame) {
         this.gameThread = gameThread;
@@ -37,11 +40,27 @@ public class GameClient implements NutsClientListener, GameInputListener {
         message.data = req;
 
         client.sendMessage(message);
+        mTimer.schedule(new TimerTask() {
+            NutsMessage message = new NutsMessage("hearth beat", null, 0);
+            @Override
+            public void run() {
+                client.sendMessage(message);
+            }
+        }, 0, 1000);
     }
 
+    /**
+     * disconnected by host
+     */
     @Override
     public void onDisconnected() {
 
+    }
+
+    public void closeConnection() {
+        mTimer.cancel();
+        mTimer.purge();
+        client.closeConnection();
     }
 
     @Override

@@ -87,7 +87,7 @@ public class GameThread extends Thread{
 
     public void addPlayer(Player player) {
         synchronized (mGame) {
-            mGame.players.put(player.name, player);
+            mGame.addPlayer(player);
         }
     }
 
@@ -115,6 +115,12 @@ public class GameThread extends Thread{
         paused = false;
         synchronized (pauseObj) {
             pauseObj.notifyAll();
+        }
+    }
+
+    public void playerDisconnected(String name) {
+        synchronized (mGame) {
+            mGame.playerDisconnected(name);
         }
     }
 

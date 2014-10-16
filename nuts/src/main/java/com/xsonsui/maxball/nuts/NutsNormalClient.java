@@ -21,6 +21,8 @@ public class NutsNormalClient extends Thread{
     private SenderThread senderThread;
     private boolean p2pAvailable;
     private int droppedPackets;
+    private ReceiverThread receiverThread;
+    private DatagramSocket socket;
 
     public NutsNormalClient(InetAddress serverIp, int serverPort, NutsClientListener listener) {
         try {
@@ -39,13 +41,12 @@ public class NutsNormalClient extends Thread{
     @Override
     public void run() {
         setName("NormalClientThread");
-        DatagramSocket socket = null;
         try {
             socket = new DatagramSocket(null);
             socket.setSoTimeout(3000);
             senderThread = new SenderThread(socket);
             senderThread.start();
-            ReceiverThread receiverThread = new ReceiverThread(socket);
+            receiverThread = new ReceiverThread(socket);
             receiverThread.start();
             int retryCount = 0;
             p2pAvailable = false;
@@ -139,5 +140,12 @@ public class NutsNormalClient extends Thread{
         } else {
             senderThread.send(new NetAddress(serverIp, serverPort), new NutsMessage("redirect", peerIp, peerPort, message));
         }
+    }
+
+
+    public void closeConnection() {
+        senderThread.stopThread();
+        receiverThread.stopThread();
+        socket.close();
     }
 }

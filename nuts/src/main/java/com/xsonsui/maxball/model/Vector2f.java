@@ -35,7 +35,7 @@ public class Vector2f implements Serializable{
         y = y / d;
     }
 
-    private float length() {
+    public float length() {
         return (float) Math.sqrt(x * x + y * y);
     }
 

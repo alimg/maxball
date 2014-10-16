@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by alim on 9/14/14.
@@ -26,6 +27,8 @@ public class GameHost implements NutsClientListener, GameThread.GameUpdateListen
     private NutsHostModeClient client;
     private Map<NetAddress, String> playerMap = new HashMap<NetAddress, String>();
     private Set<NetAddress> playerP2PMap = new HashSet<NetAddress>();
+    private Map<NetAddress, Long> lastHeard = new ConcurrentHashMap<NetAddress, Long>();
+    private long lastCheck;
 
     public GameHost(GameConnectionListener gameActivity, GameThread gameThread) {
         this.gameActivity = gameActivity;
@@ -56,17 +59,20 @@ public class GameHost implements NutsClientListener, GameThread.GameUpdateListen
             if(!playerMap.containsKey(address)) {
                 Player player = new Player(joinRequest.name);
                 player.avatar = joinRequest.avatar;
-                player.team = "b";
                 player.position.set(-100, 0);
                 gameThread.addPlayer(player);
                 playerMap.put(address, player.name);
                 if(p2p)
                     playerP2PMap.add(address);
-                System.out.println(TAG+ ": Player joined "+address.toString() + " P2P: " + p2p);
+                lastHeard.put(address, System.currentTimeMillis());
+                System.out.println(TAG + ": Player joined "+address.toString() + " P2P: " + p2p);
             }
         } else if (response.message.equals("input")) {
             Input input = (Input) response.data;
             gameThread.input(playerMap.get(address), input);
+            lastHeard.put(address, System.currentTimeMillis());
+        } else if (response.message.equals("hearth beat")) {
+            lastHeard.put(address, System.currentTimeMillis());
         }
     }
 
@@ -81,6 +87,28 @@ public class GameHost implements NutsClientListener, GameThread.GameUpdateListen
                 client.sendMessage(addr, message, playerP2PMap.contains(addr));
             }
         }
+        long time = System.currentTimeMillis();
+        if (lastCheck+3000 < time) {
+            for (Map.Entry<NetAddress, Long> e :lastHeard.entrySet()) {
+                if (e.getValue() + 5000 < time ) {
+                    playerDisconnected(e.getKey());
+                }
+            }
+        }
+    }
+
+    private void playerDisconnected(NetAddress addr) {
+        String name = playerMap.get(addr);
+        if (name == null)
+           return;
+        gameThread.playerDisconnected(name);
+        playerMap.remove(addr);
+        playerP2PMap.remove(addr);
+        lastHeard.remove(addr);
+    }
+
+    public void closeConnection() {
+        client.stopThread();
     }
 
     public interface GameConnectionListener {

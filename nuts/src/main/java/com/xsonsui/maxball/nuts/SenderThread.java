@@ -66,7 +66,7 @@ public class SenderThread extends Thread {
     }
 
     public void stopThread() {
-
+        running = false;
     }
 
     private class MessageEntry {

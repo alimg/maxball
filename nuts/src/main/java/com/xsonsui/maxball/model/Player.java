@@ -3,7 +3,7 @@ package com.xsonsui.maxball.model;
 public class Player extends Ball{
     public String name;
     public String avatar;
-    public String team;
+    public int team;
 
     public Input input;
 

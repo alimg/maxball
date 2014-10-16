@@ -1,5 +1,10 @@
 package com.xsonsui.maxball.nuts;
 
+import com.xsonsui.maxball.game.GameHost;
+import com.xsonsui.maxball.game.GameThread;
+import com.xsonsui.maxball.game.GameViewInterface;
+import com.xsonsui.maxball.model.Game;
+
 import java.net.InetAddress;
 
 /**
@@ -7,22 +12,31 @@ import java.net.InetAddress;
  */
 public class HostModeClientMain {
 
+    private static Game game;
+    private static GameThread gameThread;
+    private static GameHost host;
+
     public static void main(String args[]) {
-        new NutsHostModeClient(new NutsClientListener() {
+        game = new Game();
+        gameThread = new GameThread(game, new GameViewInterface() {
             @Override
-            public void onConnected(InetAddress publicAddress, int publicPort) {
+            public void draw(Game mGame) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        gameThread.start();
+        host = new GameHost(new GameHost.GameConnectionListener() {
+            @Override
+            public void connectToLocalHost(InetAddress publicAddress, int publicPort) {
 
             }
-
-            @Override
-            public void onDisconnected() {
-
-            }
-
-            @Override
-            public void onResponse(NutsMessage response, NetAddress address, boolean b) {
-
-            }
-        }).start();
+        }, gameThread);
+        NutsHostModeClient client = new NutsHostModeClient(host);
+        host.setClient(client);
+        client.start();
     }
 }
