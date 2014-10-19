@@ -8,6 +8,7 @@ import com.xsonsui.maxball.nuts.NetAddress;
 import com.xsonsui.maxball.nuts.NutsConstants;
 import com.xsonsui.maxball.nuts.NutsMessage;
 import com.xsonsui.maxball.nuts.NutsPacket;
+import com.xsonsui.maxball.serialization.NutsKryoFactory;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

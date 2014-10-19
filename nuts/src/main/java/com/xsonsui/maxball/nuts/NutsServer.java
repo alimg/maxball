@@ -31,7 +31,7 @@ public class NutsServer extends Thread{
                 try {
                     NutsMessage request = receiverThread.receive(3);
 
-                    InetAddress address = InetAddress.getByAddress(request.srcAddress.getAddress());
+                    InetAddress address = request.srcAddress;
                     int port = request.srcPort;
 
                     try {
@@ -48,8 +48,8 @@ public class NutsServer extends Thread{
                         } else if (request.message.equals("connect me")) {
                             System.out.println("connect me: " + request.srcAddress.toString() +
                                     ":" + request.srcPort + " to " + request.address.toString()+":"+request.port);
-                            senderThread.send(new NetAddress(InetAddress.getByAddress(request.address.getAddress()), request.port),
-                                    new NutsMessage("incoming connection", InetAddress.getByAddress(address.getAddress()), port));
+                            senderThread.send(new NetAddress(request.address, request.port),
+                                    new NutsMessage("incoming connection", address, port));
                         } else if (request.message.equals("ping")) {
                             senderThread.send(new NetAddress(address, port),
                                     new NutsMessage("pong", address, port));
@@ -61,7 +61,7 @@ public class NutsServer extends Thread{
                             NutsMessage message = ((NutsMessage) request.data);
                             message.address = address;
                             message.port = port;
-                            senderThread.send(new NetAddress(InetAddress.getByAddress(request.address.getAddress()), request.port),
+                            senderThread.send(new NetAddress(request.address, request.port),
                                     message);
                         }
                     } catch (ClassCastException e) {

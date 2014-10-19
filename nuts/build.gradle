@@ -15,5 +15,6 @@ apply plugin: 'eu.appsatori.fatjar'
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'org.apache.commons:commons-collections4:4.0'
+    compile 'com.esotericsoftware:kryo-shaded:3.0.0'
 }
 

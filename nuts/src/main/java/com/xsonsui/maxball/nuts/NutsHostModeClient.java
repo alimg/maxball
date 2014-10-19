@@ -61,10 +61,10 @@ public class NutsHostModeClient extends Thread{
 
                     if (response.message.equals("incoming connection")) {
                         System.out.println("Sending hello " + response.address.toString() + ":" + response.port);
-                        senderThread.send(new NetAddress(InetAddress.getByAddress(response.address.getAddress()),
+                        senderThread.send(new NetAddress(response.address,
                                 response.port), new NutsMessage("hello", null, 0));
                     } else if (response.message.equals("hello")) {
-                        senderThread.send(new NetAddress(InetAddress.getByAddress(response.srcAddress.getAddress()),
+                        senderThread.send(new NetAddress(response.srcAddress,
                                 response.srcPort), new NutsMessage("i hear you", null, 0));
                     } else if (response.message.equals("pong")) {
                         System.out.println("Ping to nuts: " + (System.currentTimeMillis() - lastPingSent));

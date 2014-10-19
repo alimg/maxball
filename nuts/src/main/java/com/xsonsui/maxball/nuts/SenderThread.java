@@ -43,6 +43,7 @@ public class SenderThread extends Thread {
                         int length = Math.min(MAX_PACKET_SIZE, buffer.capacity() - buffer.position());
                         buffer.get(outBuffer, HEADER_SIZE, length);
                         NutsPacket.computePacketHeader(outBuffer, seqNo, length, numPackets, i);
+                        packet.setLength(length+HEADER_SIZE);
                         mSocket.send(packet);
                     }
                 } catch (ClassNotFoundException e) {

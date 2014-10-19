@@ -75,8 +75,8 @@ public class GameActivity extends Activity implements GameHost.GameConnectionLis
 
                 NutsNormalClient client = null;
                 try {
-                    client = new NutsNormalClient(InetAddress.getByName("127.0.0.1"), 29071, gameClient);
-                    //client = new NutsNormalClient(InetAddress.getByAddress(publicAddress.getAddress()), publicPort, gameClient);
+                    //client = new NutsNormalClient(InetAddress.getByName("127.0.0.1"), 29071, gameClient);
+                    client = new NutsNormalClient(InetAddress.getByAddress(publicAddress.getAddress()), publicPort, gameClient);
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }

@@ -23,6 +23,7 @@ public class GameClient implements NutsClientListener, GameInputListener {
     private NutsNormalClient client;
     private Input mInput = new Input();
     private Timer mTimer = new Timer();
+    private boolean isConnected = false;
 
     public GameClient(GameThread gameThread, String playerName, String playerAvatar, boolean isLocalGame) {
         this.gameThread = gameThread;
@@ -47,10 +48,11 @@ public class GameClient implements NutsClientListener, GameInputListener {
                 client.sendMessage(message);
             }
         }, 0, 1000);
+        isConnected = true;
     }
 
     /**
-     * disconnected by host
+     * disconnected by host/network
      */
     @Override
     public void onDisconnected() {
@@ -58,6 +60,8 @@ public class GameClient implements NutsClientListener, GameInputListener {
     }
 
     public void closeConnection() {
+        if (!isConnected)
+            return;
         mTimer.cancel();
         mTimer.purge();
         client.closeConnection();
