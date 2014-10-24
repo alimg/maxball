@@ -4,11 +4,10 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.xsonsui.maxball.model.Lobby;
-import com.xsonsui.maxball.nuts.NetAddress;
+import com.xsonsui.maxball.nuts.model.NetAddress;
 import com.xsonsui.maxball.nuts.NutsConstants;
-import com.xsonsui.maxball.nuts.NutsMessage;
-import com.xsonsui.maxball.nuts.NutsPacket;
-import com.xsonsui.maxball.serialization.NutsKryoFactory;
+import com.xsonsui.maxball.nuts.model.NutsMessage;
+import com.xsonsui.maxball.nuts.model.NutsPacket;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

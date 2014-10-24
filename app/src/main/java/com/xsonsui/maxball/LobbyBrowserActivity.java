@@ -12,7 +12,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.xsonsui.maxball.model.Lobby;
-import com.xsonsui.maxball.nuts.NetAddress;
+import com.xsonsui.maxball.nuts.model.NetAddress;
 
 import java.util.List;
 

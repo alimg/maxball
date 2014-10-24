@@ -3,9 +3,9 @@ package com.xsonsui.maxball.game;
 import com.xsonsui.maxball.model.GameUpdate;
 import com.xsonsui.maxball.model.Input;
 import com.xsonsui.maxball.model.JoinRequest;
-import com.xsonsui.maxball.nuts.NetAddress;
+import com.xsonsui.maxball.nuts.model.NetAddress;
 import com.xsonsui.maxball.nuts.NutsClientListener;
-import com.xsonsui.maxball.nuts.NutsMessage;
+import com.xsonsui.maxball.nuts.model.NutsMessage;
 import com.xsonsui.maxball.nuts.NutsNormalClient;
 
 import java.net.InetAddress;

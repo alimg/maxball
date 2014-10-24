@@ -1,4 +1,4 @@
-package com.xsonsui.maxball.nuts;
+package com.xsonsui.maxball.nuts.model;
 
 import java.io.Serializable;
 import java.net.InetAddress;

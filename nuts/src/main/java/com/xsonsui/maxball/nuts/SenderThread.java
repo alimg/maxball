@@ -1,5 +1,9 @@
 package com.xsonsui.maxball.nuts;
 
+import com.xsonsui.maxball.nuts.model.NetAddress;
+import com.xsonsui.maxball.nuts.model.NutsMessage;
+import com.xsonsui.maxball.nuts.model.NutsPacket;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

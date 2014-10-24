@@ -1,5 +1,8 @@
 package com.xsonsui.maxball.nuts;
 
+import com.xsonsui.maxball.nuts.model.NutsMessage;
+import com.xsonsui.maxball.nuts.model.NutsPacket;
+
 import org.apache.commons.collections4.map.LRUMap;
 
 import java.io.IOException;
@@ -8,7 +11,6 @@ import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 

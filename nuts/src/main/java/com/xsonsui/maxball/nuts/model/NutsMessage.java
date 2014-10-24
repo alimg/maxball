@@ -1,4 +1,4 @@
-package com.xsonsui.maxball.nuts;
+package com.xsonsui.maxball.nuts.model;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;

@@ -12,7 +12,10 @@ public class NutsConstants {
     public static final int NUTS_SERVER_PORT = 5077;
 
     public static int checksum(byte[] outBuffer, int offset, int length) {
-
-        return 0;
+        int crc = outBuffer[length-1];
+        for (int i=offset+1;i<length;i+=2) {
+            crc= crc | outBuffer[i] | (outBuffer[i-1]<<8);
+        }
+        return crc;
     }
 }

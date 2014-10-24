@@ -1,4 +1,6 @@
-package com.xsonsui.maxball.nuts;
+package com.xsonsui.maxball.nuts.model;
+
+import com.xsonsui.maxball.nuts.NutsConstants;
 
 import static com.xsonsui.maxball.nuts.NutsConstants.HEADER_SIZE;
 
