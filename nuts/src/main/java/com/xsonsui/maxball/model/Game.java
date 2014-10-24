@@ -16,7 +16,7 @@ public class Game {
     public static final float ARENA_HEIGHT_2 = 150;
     public static final float ARENA_WIDTH_2 = 300;
     public static final float GOAL_AREA_SIZE = 50;
-    public static final float MAX_PLAYER_FORCE = 50;
+    public static final float MAX_PLAYER_FORCE = 200;
     public Map<String, Player> players = new HashMap<String, Player>();
     public Map<String, Player> waitingPlayers= new HashMap<String, Player>();
 
@@ -51,10 +51,14 @@ public class Game {
         }
         collideWalls(ball);
 
+        Vector2f f = new Vector2f();
         for (Player p : players.values()) {
+            f.set(p.speed);
+            p.force.add(f,-0.75f);
+            f.multiply(f.length()*-0.05f);
+            p.force.add(f);
             p.applyForces(dt);
             p.position.add(p.speed, dt);
-            p.speed.multiply(0.95f);
         }
         ball.applyForces(dt);
         ball.position.add(ball.speed, dt);

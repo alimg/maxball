@@ -59,4 +59,8 @@ public class Vector2f implements Serializable{
         this.y = y;
     }
 
+    public void set(Vector2f v) {
+        x = v.x;
+        y = v.y;
+    }
 }

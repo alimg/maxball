@@ -15,6 +15,7 @@ import com.xsonsui.maxball.game.GameViewInterface;
 import com.xsonsui.maxball.model.Ball;
 import com.xsonsui.maxball.model.Game;
 import com.xsonsui.maxball.model.Player;
+import com.xsonsui.maxball.model.Vector2f;
 
 public class GameView extends SurfaceView implements SurfaceHolder.Callback, GameViewInterface {
 
@@ -35,6 +36,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
     private int height;
     private boolean ready = false;
     private SurfaceHolder mHolder;
+    private boolean touchState = false;
+    private float touchLastX;
+    private float touchLastY;
+    private float touchInputMultiplier = 3;
 
     public GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -91,7 +96,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
         if(mHolder.getSurface().isValid()){
             Canvas canvas = mHolder.lockCanvas();
             canvas.drawRect(0,0,width,height, paintWhite);
-            canvas.drawText("Score: "+game.scoreRed+"-"+game.scoreBlue,0,100,paintBlack);
+            canvas.save();
             canvas.translate(width/2.0f, height/2.0f);
             canvas.scale(width/Game.ARENA_WIDTH_2/2, width/Game.ARENA_WIDTH_2/2);
             canvas.drawRect(-Game.ARENA_WIDTH_2, -Game.ARENA_HEIGHT_2, Game.ARENA_WIDTH_2, Game.ARENA_HEIGHT_2, paintGreen);
@@ -104,6 +109,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
                     drawPlayer(canvas, p);
                 }
                 drawBall(canvas, game.ball);
+            }
+            canvas.restore();
+            canvas.drawText("Score: "+game.scoreRed+"-"+game.scoreBlue,0,100,paintBlack);
+            if (touchState) {
+                Vector2f f = new Vector2f(touchLastX-touchStartX, touchLastY-touchStartY);
+                if(f.length()>Game.MAX_PLAYER_FORCE/touchInputMultiplier) {
+                    f.normalize();
+                    f.multiply(Game.MAX_PLAYER_FORCE/touchInputMultiplier);
+                }
+                canvas.drawLine(touchStartX, touchStartY, f.x + touchStartX, f.y + touchStartY, paintBlack);
             }
             mHolder.unlockCanvasAndPost(canvas);
         }
@@ -125,21 +140,25 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
                     touchStartX = event.getX();
                     touchStartY = event.getY();
                     touchStartInd = event.getActionIndex();
+                    touchState = true;
                 } else {
                     gameInputListener.inputKick(1);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if(event.getActionIndex()==touchStartInd) {
+                    touchLastX = event.getX();
+                    touchLastY = event.getY();
                     gameInputListener.inputMove(
-                            event.getX() - touchStartX,
-                            event.getY() - touchStartY);
+                            (event.getX() - touchStartX)*touchInputMultiplier,
+                            (event.getY() - touchStartY)*touchInputMultiplier);
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 if(event.getActionIndex()==touchStartInd) {
                     gameInputListener.inputMove(0, 0);
                     touchStartInd=-1;
+                    touchState = false;
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
