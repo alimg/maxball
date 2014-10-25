@@ -29,6 +29,7 @@ public class Game {
     private Vector2f vecLeft = new Vector2f(-1, 0);
     private Vector2f vecDown = new Vector2f(0, -1);
     private static final float COLLISION_DAMP = 0.01f;
+    private static final float KICK_FORCE = 3;
 
     public void evaluate(float dt, Game delta) {
         ball.position.add(delta.ball.speed, dt);
@@ -46,9 +47,7 @@ public class Game {
                     break;
                 collideBalls(p1, p2, 0.01f);
             }
-            if(p1.input.kick>0)
-                collideBalls(p1, ball, -0.01f);
-            else collideBalls(p1, ball, 0.01f);
+            collideBalls(p1, ball, p1.input.kick);
             collideWalls(p1);
         }
         collideWalls(ball);
@@ -62,26 +61,15 @@ public class Game {
             }
             p.force.add(f);
             f.set(p.speed);
-            p.force.add(f, -1.75f);
-            f.multiply(f.length() * -0.5f);
+            p.force.add(f, -2.5f);
+            f.multiply(f.length() * -0.75f);
         }
         f.set(ball.speed);
         ball.force.add(f, -0.25f);
     }
 
     public void checkCollisions() {
-/*
-        for (Player p1 : players.values()) {
-            for (Player p2 : players.values()) {
-                if (p1 == p2)
-                    break;
-                collideBalls(p1, p2);
-            }
-            collideBalls(p1, ball);
-            collideWalls(p1);
-        }*/
         collideWalls(ball);
-
     }
 
     private void collideWalls(Ball ball) {
@@ -178,7 +166,7 @@ public class Game {
     }
 
 
-    private void collideBalls(Ball p1, Ball p2, float damp) {
+    private void collideBalls(Ball p1, Ball p2, float kick) {
         final Vector2f f = new Vector2f();
         final Vector2f n = new Vector2f();
         float d = p1.position.distance(p2.position);
@@ -188,8 +176,11 @@ public class Game {
             n.set(p2.position.x-p1.position.x,p2.position.y-p1.position.y);
             n.normalize();
             f.set(p2.speed.x-p1.speed.x,p2.speed.y-p1.speed.y);
-            //p1.addForceRelative(n, -0.01f*n.dot(f));
-            p2.addForceRelative(n, -damp*n.dot(f));
+            //p1.addForceRelative(n, damp*n.dot(f));
+            if(kick>0.1f) {
+                p2.addForceRelative(n, KICK_FORCE);
+            }
+            p2.addForceRelative(n, -COLLISION_DAMP*n.dot(f));
         }
     }
 
