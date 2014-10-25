@@ -30,7 +30,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
     private Paint paintBlack = new Paint();
     private float touchStartX;
     private float touchStartY;
-    private int touchStartInd = -1;
+    private int touchStartId = -1;
     private GameInputListener gameInputListener;
     private int width;
     private int height;
@@ -132,21 +132,24 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
     public boolean onTouchEvent(MotionEvent event) {
         if (gameInputListener == null)
             return false;
-        int action = event.getAction();
+        int action = event.getActionMasked();
+
+        int pointerId = event.getPointerId(event.getActionIndex());
         switch(action){
             case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN:
 
-                if(event.getX() < getWidth()*0.8) {
+                if (event.getX() < getWidth()*0.8 && !touchState) {
                     touchStartX = event.getX();
                     touchStartY = event.getY();
-                    touchStartInd = event.getActionIndex();
+                    touchStartId = pointerId;
                     touchState = true;
                 } else {
                     gameInputListener.inputKick(1);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if(event.getActionIndex()==touchStartInd) {
+                if (pointerId == touchStartId) {
                     touchLastX = event.getX();
                     touchLastY = event.getY();
                     gameInputListener.inputMove(
@@ -155,10 +158,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if(event.getActionIndex()==touchStartInd) {
+            case MotionEvent.ACTION_POINTER_UP:
+                 if (pointerId == touchStartId && touchState) {
                     gameInputListener.inputMove(0, 0);
-                    touchStartInd=-1;
+                    touchStartId =-1;
                     touchState = false;
+                } else {
+                    gameInputListener.inputKick(0);
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:

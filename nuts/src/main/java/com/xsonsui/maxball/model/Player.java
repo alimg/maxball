@@ -14,4 +14,15 @@ public class Player extends Ball{
         this.radius = 20;
         this.input = new Input();
     }
+
+    public Player(Player p) {
+        super();
+        position.set(p.position);
+        speed.set(p.speed);
+        force.set(p.force);
+        name = p.name;
+        mass = p.mass;
+        radius = p.radius;
+        this.input = new Input();
+    }
 }

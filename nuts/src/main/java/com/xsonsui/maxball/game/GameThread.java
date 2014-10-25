@@ -9,6 +9,8 @@ public class GameThread extends Thread{
 
     private static final String TAG = "GameThread";
     private final Game mGame;
+    private final Game dState[];
+    private final Game zState;
     private final GameViewInterface view;
     private boolean running = true;
     private GameUpdateListener gameUpdateListener;
@@ -17,6 +19,12 @@ public class GameThread extends Thread{
 
     public GameThread(Game game, GameViewInterface view) {
         mGame = game;
+        dState = new Game[4];
+        dState[0] = new Game();
+        dState[1] = new Game();
+        dState[2] = new Game();
+        dState[3] = new Game();
+        zState = new Game();
         this.view = view;
     }
 
@@ -58,7 +66,21 @@ public class GameThread extends Thread{
             while ( accumulator >= dt )
             {
                 synchronized (mGame) {
-                    mGame.step(dt);
+                    mGame.writeP(dState[0]);
+                    mGame.writeP(dState[1]);
+                    mGame.writeP(dState[2]);
+                    mGame.writeP(dState[3]);
+                    mGame.writeP(zState);
+                    mGame.writeD(zState);
+                    dState[0].evaluate(0, zState);
+                    //dState[0].writeD(dState[1]);
+                    dState[1].evaluate(dt * 0.5f, dState[0]);
+                   // dState[1].writeD(dState[2]);
+                    dState[2].evaluate(dt * 0.5f, dState[1]);
+                  //  dState[2].writeD(dState[3]);
+                    dState[3].evaluate(dt, dState[2]);
+                    mGame.checkCollisions();
+                    mGame.integrate(dt, dState);
                 }
                 accumulator -= dt;
                 t += dt;

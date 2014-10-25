@@ -63,4 +63,8 @@ public class Vector2f implements Serializable{
         x = v.x;
         y = v.y;
     }
+
+    public float dot(Vector2f v) {
+        return v.x*x + v.y*y;
+    }
 }
