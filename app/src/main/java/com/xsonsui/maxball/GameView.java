@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -54,6 +55,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
     }
 
     private void init() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        touchInputMultiplier = 12f/metrics.density;
         mHolder = getHolder();
         mHolder.addCallback(this);
 

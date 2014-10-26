@@ -16,7 +16,8 @@ public class Game {
     public static final float ARENA_HEIGHT_2 = 150;
     public static final float ARENA_WIDTH_2 = 300;
     public static final float GOAL_AREA_SIZE = 50;
-    public static final float MAX_PLAYER_FORCE = 250;
+    public static final float MAX_PLAYER_FORCE = 300;
+    private static final float KICK_FORCE = 2f;
     public Map<String, Player> players = new HashMap<String, Player>();
     public Map<String, Player> waitingPlayers= new HashMap<String, Player>();
 
@@ -28,8 +29,6 @@ public class Game {
     public int scoreBlue;
     private Vector2f vecLeft = new Vector2f(-1, 0);
     private Vector2f vecDown = new Vector2f(0, -1);
-    private static final float COLLISION_DAMP = 0.01f;
-    private static final float KICK_FORCE = 3;
 
     public void evaluate(float dt, Game delta) {
         ball.position.add(delta.ball.speed, dt);
@@ -45,7 +44,7 @@ public class Game {
             for (Player p2 : players.values()) {
                 if (p1 == p2)
                     break;
-                collideBalls(p1, p2, 0.01f);
+                collideBalls(p1, p2, 0.00f);
             }
             collideBalls(p1, ball, p1.input.kick);
             collideWalls(p1);
@@ -61,11 +60,14 @@ public class Game {
             }
             p.force.add(f);
             f.set(p.speed);
-            p.force.add(f, -2.5f);
-            f.multiply(f.length() * -0.75f);
+            p.force.add(f, -0.75f);
+            f.multiply(f.length() * -0.0625f);
+            p.force.add(f);
         }
         f.set(ball.speed);
-        ball.force.add(f, -0.25f);
+        f.multiply(f.length() * -0.00001f);
+        ball.force.add(f);
+        ball.force.add(ball.speed, -0.1f);
     }
 
     public void checkCollisions() {
@@ -75,7 +77,7 @@ public class Game {
     private void collideWalls(Ball ball) {
         if (ball.position.x+ball.radius > ARENA_WIDTH_2) {
             ball.addForceRelative(vecLeft, ball.position.x + ball.radius - ARENA_WIDTH_2);
-            ball.addForceRelative(vecLeft, -COLLISION_DAMP * vecLeft.dot(ball.speed));
+            ball.addForceRelative(vecLeft, -ball.WALL_COLLISION_DAMP * vecLeft.dot(ball.speed));
             if (ball==this.ball)
                 if (ball.position.y>-GOAL_AREA_SIZE && ball.position.y<GOAL_AREA_SIZE) {
                     goalRight();
@@ -83,7 +85,7 @@ public class Game {
         }
         if (ball.position.x-ball.radius < -ARENA_WIDTH_2) {
             ball.addForceRelative(vecLeft, ball.position.x - ball.radius + ARENA_WIDTH_2);
-            ball.addForceRelative(vecLeft, -COLLISION_DAMP * vecLeft.dot(ball.speed));
+            ball.addForceRelative(vecLeft, -ball.WALL_COLLISION_DAMP * vecLeft.dot(ball.speed));
             if (ball==this.ball)
                 if (ball.position.y>-GOAL_AREA_SIZE && ball.position.y<GOAL_AREA_SIZE) {
                     goalLeft();
@@ -92,13 +94,36 @@ public class Game {
 
         if (ball.position.y+ball.radius > ARENA_HEIGHT_2) {
             ball.addForceRelative(vecDown, ball.position.y + ball.radius - ARENA_HEIGHT_2);
-            ball.addForceRelative(vecDown, -COLLISION_DAMP * vecDown.dot(ball.speed));
+            ball.addForceRelative(vecDown, -ball.WALL_COLLISION_DAMP * vecDown.dot(ball.speed));
         }
         if (ball.position.y-ball.radius < -ARENA_HEIGHT_2) {
             ball.addForceRelative(vecDown, ball.position.y - ball.radius + ARENA_HEIGHT_2);
-            ball.addForceRelative(vecDown, -COLLISION_DAMP * vecDown.dot(ball.speed));
+            ball.addForceRelative(vecDown, -ball.WALL_COLLISION_DAMP * vecDown.dot(ball.speed));
         }
 
+    }
+
+    private void collideBalls(Ball p1, Ball p2, float kick) {
+        final Vector2f f = new Vector2f();
+        final Vector2f n = new Vector2f();
+        float d = p1.position.distance(p2.position);
+        if (d <= p1.radius+p2.radius) {
+            p1.addForce(p2.position, d - p2.radius);
+            p2.addForce(p1.position, d - p1.radius);
+            n.set(p2.position.x-p1.position.x,p2.position.y-p1.position.y);
+            n.normalize();
+            f.set(p2.speed.x-p1.speed.x,p2.speed.y-p1.speed.y);
+            if(kick>0.1f) {
+                p2.addForceRelative(n, KICK_FORCE);
+            }
+            else {
+                float cdf = n.dot(f);
+                p2.addForceRelative(n, -cdf * p2.COLLISION_DAMP);
+                //if (cdf > 0)
+                    //p2.addForceRelative(n, -cdf * p2.COLLISION_DAMP);
+                //else p1.addForceRelative(n, -cdf * p1.COLLISION_DAMP);
+            }
+        }
     }
 
     private void goalLeft() {
@@ -165,24 +190,6 @@ public class Game {
         ball.force.set(0, 0);
     }
 
-
-    private void collideBalls(Ball p1, Ball p2, float kick) {
-        final Vector2f f = new Vector2f();
-        final Vector2f n = new Vector2f();
-        float d = p1.position.distance(p2.position);
-        if (d <= p1.radius+p2.radius) {
-            p1.addForce(p2.position, d - p2.radius);
-            p2.addForce(p1.position, d - p1.radius);
-            n.set(p2.position.x-p1.position.x,p2.position.y-p1.position.y);
-            n.normalize();
-            f.set(p2.speed.x-p1.speed.x,p2.speed.y-p1.speed.y);
-            //p1.addForceRelative(n, damp*n.dot(f));
-            if(kick>0.1f) {
-                p2.addForceRelative(n, KICK_FORCE);
-            }
-            p2.addForceRelative(n, -COLLISION_DAMP*n.dot(f));
-        }
-    }
 
     public void init() {
         ball = new Ball();

@@ -6,6 +6,8 @@ import java.io.Serializable;
  * Created by alim on 9/12/14.
  */
 public class Ball implements Serializable{
+    public transient float COLLISION_DAMP = 0.011f;
+    public transient float WALL_COLLISION_DAMP = 0.003f;
     public Vector2f position;
     public float radius;
     public Vector2f speed;
@@ -17,9 +19,9 @@ public class Ball implements Serializable{
     public Ball(){
         position = new Vector2f();
         speed = new Vector2f();
-        radius= 16;
-        mass = 0.25f;
-        k = 2000f;
+        radius= 12;
+        mass = 0.1f;
+        k = 1000f;
     }
 
     public void addForce(Vector2f pivot, float v) {
