@@ -2,6 +2,7 @@ package com.xsonsui.maxball.nuts;
 
 import com.xsonsui.maxball.nuts.model.NetAddress;
 import com.xsonsui.maxball.nuts.model.NutsMessage;
+import com.xsonsui.maxball.nuts.server.ServerStats;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -9,12 +10,20 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NutsServer extends Thread{
 
+    private static final long HOSTCLEANTASK_INTERVAL = 5000;
+    private static final long REMOVE_HOST_AFTER = 15000;
     private boolean running = true;
-    private HashMap<NetAddress, Long> mHosts = new HashMap<NetAddress, Long>();
+    private ConcurrentHashMap<NetAddress, Long> mHosts = new ConcurrentHashMap<NetAddress, Long>();
+    private ServerStats mStats;
+    private Timer mTimer = new Timer();
 
     public NutsServer(){
     }
@@ -28,6 +37,11 @@ public class NutsServer extends Thread{
             senderThread.start();
             ReceiverThread receiverThread = new ReceiverThread(socket);
             receiverThread.start();
+
+            mStats = new ServerStats();
+
+            mTimer.scheduleAtFixedRate(new CleanHostsTask(),
+                    HOSTCLEANTASK_INTERVAL, HOSTCLEANTASK_INTERVAL);
 
             while(running) {
                 try {
@@ -53,8 +67,13 @@ public class NutsServer extends Thread{
                             senderThread.send(new NetAddress(request.address, request.port),
                                     new NutsMessage("incoming connection", address, port));
                         } else if (request.message.equals("ping")) {
-                            senderThread.send(new NetAddress(address, port),
-                                    new NutsMessage("pong", address, port));
+                            NetAddress clientAddr = new NetAddress(address, port);
+                            senderThread.send(clientAddr,
+                                    new NutsMessage("pong", null, 0));
+
+                            if (mHosts.containsKey(clientAddr)) {
+                                mHosts.put(clientAddr, System.currentTimeMillis());
+                            }
                         } else if (request.message.equals("list servers")) {
                             senderThread.send(new NetAddress(address, port),
                                     new NutsMessage("server list", address, port,
@@ -65,6 +84,7 @@ public class NutsServer extends Thread{
                             message.port = port;
                             senderThread.send(new NetAddress(request.address, request.port),
                                     message);
+                            mStats.redirectedPackets++;
                         }
                     } catch (ClassCastException e) {
                         e.printStackTrace();
@@ -82,5 +102,19 @@ public class NutsServer extends Thread{
 
     public void stopServer(){
         running = false;
+    }
+
+    private class CleanHostsTask extends TimerTask {
+        @Override
+        public void run() {
+            Iterator<Map.Entry<NetAddress, Long>> it = mHosts.entrySet().iterator();
+            long time = System.currentTimeMillis();
+            while (it.hasNext()) {
+                Map.Entry<NetAddress, Long> entry = it.next();
+                if (entry.getValue()-time > REMOVE_HOST_AFTER) {
+                    it.remove();
+                }
+            }
+        }
     }
 }

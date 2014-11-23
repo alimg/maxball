@@ -46,15 +46,15 @@ public class GameActivity extends Activity implements GameHost.GameConnectionLis
         gameClient = new GameClient(gameThread, playerName, playerAvatar, action.equals("host"));
         if (action.equals("join")) {
             Lobby lobby = (Lobby) extras.getSerializable("lobby");
-            NutsNormalClient client = null;
+            NutsNormalClient client;
             try {
                 client = new NutsNormalClient(InetAddress.getByAddress(lobby.ip.getAddress()), lobby.port, gameClient);
                 gameClient.setClient(client);
                 gameView.setGameInputListener(gameClient);
+                client.start();
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
-            client.start();
         } else if (action.equals("host")) {
             host = new GameHost(this, gameThread);
             NutsHostModeClient client = new NutsHostModeClient(host);
@@ -73,16 +73,16 @@ public class GameActivity extends Activity implements GameHost.GameConnectionLis
             @Override
             public void run() {
 
-                NutsNormalClient client = null;
+                NutsNormalClient client;
                 try {
                     client = new NutsNormalClient(InetAddress.getByName("127.0.0.1"), 29071, gameClient);
                     //client = new NutsNormalClient(InetAddress.getByAddress(publicAddress.getAddress()), publicPort, gameClient);
+                    gameClient.setClient(client);
+                    gameView.setGameInputListener(gameClient);
+                    client.start();
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }
-                gameClient.setClient(client);
-                gameView.setGameInputListener(gameClient);
-                client.start();
             }
         });
 
@@ -103,6 +103,7 @@ public class GameActivity extends Activity implements GameHost.GameConnectionLis
     @Override
     protected void onStop() {
         super.onStop();
+        gameThread.stopThread();
         gameClient.closeConnection();
         if (host != null) {
             host.closeConnection();

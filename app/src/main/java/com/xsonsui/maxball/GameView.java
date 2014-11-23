@@ -29,6 +29,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
     private Paint paintBlue = new Paint();
     private Paint paintWhite = new Paint();
     private Paint paintBlack = new Paint();
+    private Paint paintKick = new Paint();
     private float touchStartX;
     private float touchStartY;
     private int touchStartId = -1;
@@ -68,8 +69,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
         paintBlack.setColor(Color.BLACK);
         paintRed.setColor(Color.RED);
         paintBlue.setColor(Color.BLUE);
-
         paintBlack.setTextSize(60);
+        paintKick.setColor(0xaaffffff);
+        paintKick.setStyle(Paint.Style.STROKE);
     }
 
 
@@ -82,6 +84,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Gam
             canvas.drawOval(rect, paintRed);
         else if (p.team == Game.TEAM_BLUE)
             canvas.drawOval(rect, paintBlue);
+        if (p.input.kick>0) {
+            paintKick.setStrokeWidth(1+(System.currentTimeMillis()%200)/20);
+            canvas.drawOval(rect, paintKick);
+        }
     }
 
     private void drawBall(Canvas canvas, Ball p) {

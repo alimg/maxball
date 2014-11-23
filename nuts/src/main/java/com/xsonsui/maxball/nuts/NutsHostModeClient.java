@@ -18,6 +18,7 @@ public class NutsHostModeClient extends Thread{
     private NetAddress nutsServerAddress;
     private ReceiverThread receiverThread;
     private DatagramSocket socket;
+    private long PINGING_PERIOD = 5000;
 
     public NutsHostModeClient(NutsClientListener listener) {
         this.listener = listener;
@@ -70,12 +71,15 @@ public class NutsHostModeClient extends Thread{
                                 response.srcPort), new NutsMessage("i hear you", null, 0));
                     } else if (response.message.equals("pong")) {
                         System.out.println("Ping to nuts: " + (System.currentTimeMillis() - lastPingSent));
+                    }  else if (response.message.equals("ping")) {
+                        senderThread.send(new NetAddress(response.srcAddress, response.srcPort),
+                                new NutsMessage("pong", null, 0));
                     } else if (response.srcAddress.equals(nutsServerIp)) {
                         listener.onResponse(response, new NetAddress(response.address, response.port), false);
                     } else {
                         listener.onResponse(response, new NetAddress(response.srcAddress, response.srcPort), true);
                     }
-                    if (System.currentTimeMillis()-lastPingSent > 10000) {
+                    if (System.currentTimeMillis()-lastPingSent > PINGING_PERIOD) {
                         senderThread.send(new NetAddress(nutsServerIp, NutsConstants.NUTS_SERVER_PORT),
                                 new NutsMessage("ping", null, 0));
                         lastPingSent = System.currentTimeMillis();

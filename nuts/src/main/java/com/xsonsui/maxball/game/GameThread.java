@@ -15,7 +15,7 @@ public class GameThread extends Thread{
     private boolean running = true;
     private GameUpdateListener gameUpdateListener;
     private boolean paused = false;
-    private Object pauseObj = new Object();
+    private final Object pauseObj = new Object();
 
     public GameThread(Game game, GameViewInterface view) {
         mGame = game;
@@ -73,14 +73,11 @@ public class GameThread extends Thread{
                     mGame.writeP(zState);
                     mGame.writeD(zState);
                     dState[0].evaluate(0, zState);
-                    //dState[0].writeD(dState[1]);
                     dState[1].evaluate(dt * 0.5f, dState[0]);
-                   // dState[1].writeD(dState[2]);
                     dState[2].evaluate(dt * 0.5f, dState[1]);
-                  //  dState[2].writeD(dState[3]);
                     dState[3].evaluate(dt, dState[2]);
-                    mGame.checkCollisions();
                     mGame.integrate(dt, dState);
+                    mGame.checkCollisions();
                 }
                 accumulator -= dt;
                 t += dt;

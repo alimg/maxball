@@ -8,8 +8,8 @@ import java.io.Serializable;
 public class Ball implements Serializable{
     public transient float COLLISION_DAMP = 0.011f;
     public transient float WALL_COLLISION_DAMP = 0.003f;
-    public Vector2f position;
     public float radius;
+    public Vector2f position;
     public Vector2f speed;
 
     public transient Vector2f force = new Vector2f();
@@ -19,7 +19,7 @@ public class Ball implements Serializable{
     public Ball(){
         position = new Vector2f();
         speed = new Vector2f();
-        radius= 12;
+        radius = 12;
         mass = 0.1f;
         k = 1000f;
     }
