@@ -56,16 +56,12 @@ public class ReceiverThread extends Thread {
                         byteBuffer.put(p.data, NutsConstants.HEADER_SIZE, p.length);
                     }
 
-                    try {
-                        NutsMessage message = NutsMessage.deserialize(byteBuffer.array());
-                        message.srcAddress = packet.getAddress();
-                        message.srcPort = packet.getPort();
-                        message.sequenceNo = header.seqNo;
-                        mQueue.offer(message);
-                        packetCache.remove(seqHash);
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
+                    NutsMessage message = NutsMessage.deserialize(byteBuffer.array());
+                    message.srcAddress = packet.getAddress();
+                    message.srcPort = packet.getPort();
+                    message.sequenceNo = header.seqNo;
+                    mQueue.offer(message);
+                    packetCache.remove(seqHash);
                 }
             } catch (SocketTimeoutException e) {
                 interrupt();

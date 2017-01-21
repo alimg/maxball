@@ -37,7 +37,7 @@ public class NutsMessage implements KryoSerializable {
     }
 
 
-    public static NutsMessage deserialize(byte[] data) throws IOException, ClassNotFoundException {
+    public static NutsMessage deserialize(byte[] data) throws IOException {
         ByteArrayInputStream bstream = null;
         GZIPInputStream gzstream = null;
         Input input = null;
@@ -61,7 +61,7 @@ public class NutsMessage implements KryoSerializable {
         }
     }
 
-    public static byte[] serialize(NutsMessage request) throws IOException, ClassNotFoundException {
+    public static byte[] serialize(NutsMessage request) throws IOException {
         Kryo kryo = NutsKryoFactory.pool.borrow();
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         GZIPOutputStream gzipStream = new GZIPOutputStream(outStream);

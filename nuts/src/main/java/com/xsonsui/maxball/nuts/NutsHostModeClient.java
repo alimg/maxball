@@ -34,7 +34,7 @@ public class NutsHostModeClient extends Thread{
             receiverThread = new ReceiverThread(socket);
             receiverThread.start();
 
-            nutsServerIp = InetAddress.getByName(NutsConstants.NUTS_SERVER_IP);
+            nutsServerIp = InetAddress.getByName(NutsConstants.NUTS_SERVER_ADDRESS);
             nutsServerAddress = new NetAddress(nutsServerIp, NutsConstants.NUTS_SERVER_PORT);
 
             senderThread.send(new NetAddress(nutsServerIp, NutsConstants.NUTS_SERVER_PORT),
@@ -74,7 +74,7 @@ public class NutsHostModeClient extends Thread{
                     }  else if (response.message.equals("ping")) {
                         senderThread.send(new NetAddress(response.srcAddress, response.srcPort),
                                 new NutsMessage("pong", null, 0));
-                    } else if (response.srcAddress.equals(nutsServerIp)) {
+                    } else if (response.srcAddress.equals(nutsServerIp) && response.srcPort == NutsConstants.NUTS_SERVER_PORT) {
                         listener.onResponse(response, new NetAddress(response.address, response.port), false);
                     } else {
                         listener.onResponse(response, new NetAddress(response.srcAddress, response.srcPort), true);

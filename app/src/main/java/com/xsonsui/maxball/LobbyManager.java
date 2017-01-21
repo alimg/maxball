@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LobbyManager {
-    private static final String SERVICE_URL = "54.86.106.48:8081/lobby";
-    private static final String STUN_URL = "54.86.106.48:5000";
     public interface Listener<T> {
         public void onSuccess(T result);
         public void onFailed();
@@ -34,7 +32,7 @@ public class LobbyManager {
                     DatagramSocket socket = new DatagramSocket(null);
                     DatagramPacket packet = new DatagramPacket(new byte[600],600);
                     DatagramPacket outPacket = new DatagramPacket(new byte[1024],1024);
-                    outPacket.setAddress(InetAddress.getByName(NutsConstants.NUTS_SERVER_IP));
+                    outPacket.setAddress(InetAddress.getByName(NutsConstants.NUTS_SERVER_ADDRESS));
                     outPacket.setPort(NutsConstants.NUTS_SERVER_PORT);
                     byte msgBytes[] = NutsMessage.serialize(new NutsMessage("list servers", null, 0));
                     ByteBuffer b = ByteBuffer.wrap(outPacket.getData());
@@ -80,8 +78,6 @@ public class LobbyManager {
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
 

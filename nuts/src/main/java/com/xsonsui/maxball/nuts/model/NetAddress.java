@@ -1,9 +1,10 @@
 package com.xsonsui.maxball.nuts.model;
 
 import java.io.Serializable;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 
-public class NetAddress implements Serializable{
+public class NetAddress implements Serializable {
     public InetAddress srcAddress;
     public int srcPort;
     public NetAddress(InetAddress srcAddress, int srcPort){

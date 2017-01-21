@@ -54,7 +54,7 @@ public class NutsNormalClient extends Thread{
                 try {
                     if(retryCount%2==0) {
                         senderThread.send(new NetAddress(
-                                InetAddress.getByName(NutsConstants.NUTS_SERVER_IP),
+                                InetAddress.getByName(NutsConstants.NUTS_SERVER_ADDRESS),
                                 NutsConstants.NUTS_SERVER_PORT),
                                 new NutsMessage("connect me", serverIp, serverPort));
                     }
@@ -102,7 +102,7 @@ public class NutsNormalClient extends Thread{
             if (!p2pAvailable){
                 //TODO get a dedicated server for packet redirection from somewhere.
                 // We just use the main server for now.
-                serverIp = InetAddress.getByName(NutsConstants.NUTS_SERVER_IP);
+                serverIp = InetAddress.getByName(NutsConstants.NUTS_SERVER_ADDRESS);
                 serverPort = NutsConstants.NUTS_SERVER_PORT;
             }
             listener.onConnected(null, 0);

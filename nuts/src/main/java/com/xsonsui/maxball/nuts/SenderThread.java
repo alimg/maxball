@@ -50,8 +50,6 @@ public class SenderThread extends Thread {
                         packet.setLength(length+HEADER_SIZE);
                         mSocket.send(packet);
                     }
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

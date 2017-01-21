@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'eu.appsatori:gradle-fatjar-plugin:0.3'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
     }
 
     tasks.withType(JavaCompile) {
@@ -15,11 +15,17 @@ buildscript {
     }
 }
 
-apply plugin: 'eu.appsatori.fatjar'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.xsonsui.maxball.nuts.ServerMain'
+    }
+}
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'org.apache.commons:commons-collections4:4.0'
-    compile 'com.esotericsoftware:kryo-shaded:3.0.0'
+    compile 'com.esotericsoftware:kryo-shaded:4.0.0'
 }
 
