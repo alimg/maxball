@@ -12,7 +12,9 @@ import java.net.UnknownHostException;
 
 public class NutsKryoFactory implements KryoFactory {
 
-    public static KryoPool pool = new KryoPool.Builder(new NutsKryoFactory()).softReferences().build();
+    public static KryoPool pool = new KryoPool.Builder(new NutsKryoFactory())
+            .softReferences()
+            .build();
 
     @Override
     public Kryo create() {

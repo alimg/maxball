@@ -8,6 +8,11 @@ buildscript {
     dependencies {
         classpath 'eu.appsatori:gradle-fatjar-plugin:0.3'
     }
+
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = JavaVersion.VERSION_1_7
+        targetCompatibility = JavaVersion.VERSION_1_7
+    }
 }
 
 apply plugin: 'eu.appsatori.fatjar'

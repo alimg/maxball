@@ -91,8 +91,6 @@ public class NutsServer extends Thread{
                     }
                 } catch (SocketTimeoutException e) {
 
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         } catch (SocketException e) {
